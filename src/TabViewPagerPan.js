@@ -249,13 +249,13 @@ export default class TabViewPagerPan<T: Route<*>> extends PureComponent<
 
     this._pendingIndex = toValue;
 
-    if (this.props.animationEnabled !== false) {
-      const transitionSpec = this.props.configureTransition(
-        currentTransitionProps,
-        nextTransitionProps
-      );
-      const { timing, ...transitionConfig } = transitionSpec;
+    const transitionSpec = this.props.configureTransition(
+      currentTransitionProps,
+      nextTransitionProps
+    );
+    const { timing, ...transitionConfig } = transitionSpec;
 
+    if (this.props.animationEnabled !== false) {
       timing(this.props.position, {
         ...transitionConfig,
         toValue,
@@ -266,9 +266,16 @@ export default class TabViewPagerPan<T: Route<*>> extends PureComponent<
         }
       });
     } else {
-      this.props.position.setValue(toValue);
-      this.props.jumpToIndex(toValue);
-      this._pendingIndex = null;
+      Animated.timing(this.props.position, {
+        toValue,
+        delay: 10,
+        duration: 0,
+      }).start(({ finished }) => {
+        if (finished) {
+          this.props.jumpToIndex(toValue);
+          this._pendingIndex = null;
+        }
+      });
     }
   };
 
